@@ -116,7 +116,7 @@
 		while($row=$fetch_pro->fetch()):
 			echo"<tr>
 					<td>".$i++."</td>
-					<td><a href='#'>Edit</a></td>
+					<td><a href='index.php?ecit_pro=".$row['pro_id']."'>Edit</a></td>
 					<td><a href='#'>Delete</a></td>
 					<td>".$row['pro_name']."</td>
 					<td style='min-width:200px;'> 
@@ -152,7 +152,7 @@
 							while($row=$fetch_cat->fetch()):
 								echo "<tr><td>".$i++."</td>
 										<td>".$row['cat_name']."</td>
-										<td><a href='#'>Edit</a></td>
+										<td><a href='index.php?edit_cat=".$row['cat_id']."'>Edit</a></td>
 										<td><a href='#'>Delete</a></td>
 										</tr>";
 						
@@ -170,7 +170,7 @@
 							while($row=$fetch_cat->fetch()):
 								echo "<tr><td>".$i++."</td>
 										<td>".$row['sub_cat_name']."</td>
-										<td><a href='#'>Edit</a></td>
+										<td><a href='index.php?edit_sub_cat=".$row['sub_cat_id']."'>Edit</a></td>
 										<td><a href='#'>Delete</a></td>
 										</tr>";
 						
@@ -191,4 +191,98 @@
 							//endwhile;
 						
 	}
-?>
+
+	function edit_cat()
+	{
+		include 'inc/db.php';
+		if(isset($_GET['edit_cat']))
+		{
+			$cat_id=$_GET['edit_cat'];
+			$fetch_cat_name=$con->prepare("SELECT * FROM main_cat WHERE cat_id='$cat_id'");
+			$fetch_cat_name->setFetchMode(PDO::FETCH_ASSOC);
+			$fetch_cat_name->execute();
+			$row=$fetch_cat_name->fetch();
+
+			echo "<form  method='post'>
+		<table>
+			<tr>
+				<td>Update Category Name</td>
+				<td><input type='text' name='up_cat_name' value='".$row['cat_name']."'></td>
+			</tr>
+			
+				
+			</tr>
+		</table>
+		<center><button name='update_cat'>Update Category</button></center>
+	</form>";
+
+	if(isset($_POST['update_cat']))
+	{
+		$up_cat_name=$_POST['up_cat_name'];
+		$update_cat=$con->prepare("UPDATE main_cat SET cat_name='$up_cat_name' WHERE cat_id='$cat_id'");
+		if($update_cat->execute())
+		{
+			echo "<script>alert('Category Updated Successfully');</script>";
+			echo "<script>window.open('index.php?viewall_cat','_self')</script>";
+		}
+	}
+	}
+
+	}
+	function edit_sub_cat()
+	{
+		include 'inc/db.php';
+		if(isset($_GET['edit_sub_cat']))
+		{
+			$sub_cat_id=$_GET['edit_sub_cat'];
+			$fetch_sub_cat=$con->prepare("SELECT * FROM sub_cat WHERE sub_cat_id='$sub_cat_id'");
+			$fetch_sub_cat->setFetchMode(PDO::FETCH_ASSOC);
+			$fetch_sub_cat->execute();
+			$row=$fetch_sub_cat->fetch();
+			$cat_id=$row['cat_id'];
+
+			$fetch_cat=$con->prepare("SELECT * FROM main_cat WHERE cat_id='$cat_id'");
+			$fetch_cat->setFetchMode(PDO::FETCH_ASSOC);
+			$fetch_cat->execute();
+			$row_cat=$fetch_cat->fetch();
+
+			
+
+			//echo $row['sub_cat_name'];
+
+			echo " 
+					<form method='post'>
+						<table>
+							<tr>
+								<td>Select Main Category Name</td>
+								<td>
+									<select name='main_cat'>
+										<option value='".$row_cat['cat_id']."'>".$row_cat['cat_name']."</option>";
+										echo viewall_cat(); 
+									echo "</select>
+								</td>
+							</tr>
+							<tr>
+								<td>Update Category Name</td>
+								<td><input type='text' name='up_sub_cat' value='".$row['sub_cat_name']."'></td>
+							</tr>
+						</table>
+						<center><button name='update_sub_cat'>Update Sub Category</button></center>
+						</form>";
+
+						if(isset($_POST['update_sub_cat']))
+						{
+							$cat_name=$_POST['main_cat'];
+							$sub_cat_name=$_POST['up_sub_cat'];
+
+							$update_cat=$con->prepare("UPDATE sub_cat SET sub_cat_name='$sub_cat_name',cat_name='$cat_name' sub_cat_id='$sub_cat_id'");
+							if($update_cat->execute())
+							{
+								echo "<script>alert('Subcategory updated successfuly');</script>";
+								echo "<script>window.open('index.php?viewall_sub_cat','_self');</script>";
+							}
+						}
+
+		}
+	}
+?> 
